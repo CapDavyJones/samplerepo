@@ -1,0 +1,94 @@
+How to clean a healthcare data using Python
+
+Introduction
+Data cleaning is a crucial step in the data analysis process, especially when dealing with real-world datasets, which are often incomplete, inconsistent, and filled with errors.
+
+In this tutorial, we’ll walk through the process of cleaning-up a ‘messy’ healthcare dataset using Python.
+
+This guide will be helpful for data analysts, data scientists, or anyone working with datasets that need some tidying up before analysis.
+
+Understanding the healthcare data
+The dataset we’re working with contains healthcare information such as age, blood pressure, cholesterol levels, visit dates, and more.
+
+However, this dataset is “messy” — it has various issues such as inconsistent data formats, missing values, and incorrect data entries that need to be addressed before any meaningful analysis can be performed.
+
+Some of the specific issues in this dataset include:
+
+Leading and trailing spaces in string columns.
+Non-numeric values in numeric columns (e.g., ‘forty’ instead of 40 in the Age column).
+Incorrect or missing entries in columns like Blood Pressure, Cholesterol, and Visit Date.
+The dataset can be downloaded using this GitHub link.
+
+Step-by-step data cleaning process
+Let’s dive into the steps to clean this dataset. Below, we break down each step with corresponding Python code to transform the dataset into a clean and analysis-ready format.
+
+Step 1: Load the dataset
+First, we need to load the dataset using Pandas:
+
+import pandas as pd 
+ 
+ # Load the messy data 
+ df_healthcare_messy = pd.read_csv('path_to/healthcare_messy_data.csv')
+NB: Please replace the “path_to” with the actual location of the stored messy data on your device.
+
+Step 2: Strip leading and trailing spaces
+This dataset may likely contain unnecessary spaces in string columns, which can cause problems during analysis. We remove these spaces using the following code:
+
+# Strip leading and trailing spaces from string columns 
+ for column in df_healthcare_messy.select_dtypes(include=['object']).columns: 
+ df_healthcare_messy[column] = df_healthcare_messy[column].str.strip()
+Step 3: Correct non-numeric values
+Some columns, like Age, contain non-numeric values that should be converted:
+
+# Correct the Age column 
+df_healthcare_messy['Age'] = df_healthcare_messy['Age'].replace('forty', 40)  # Replace 'forty' with 40
+df_healthcare_messy['Age'] = pd.to_numeric(df_healthcare_messy['Age'], errors='coerce')  # Convert to numeric, coercing errors to NaN
+
+# Fill NaN values in the Age column before converting to int
+df_healthcare_messy['Age'] = df_healthcare_messy['Age'].fillna(0).round(0).astype(int)  # Remove decimals and convert to int
+Similarly, for other numeric columns like Blood Pressure and Cholesterol:
+
+# Correct the Blood Pressure column 
+ df_healthcare_messy['Blood Pressure'] = df_healthcare_messy['Blood Pressure'].replace('NaN', np.nan) 
+ 
+ # Correct the Cholesterol column 
+df_healthcare_messy['Cholesterol'] = pd.to_numeric(df_healthcare_messy['Cholesterol'], errors='coerce')  # Convert to numeric, coercing errors to NaN
+
+# Fill NaN values in the Cholesterol column before converting to int
+df_healthcare_messy['Cholesterol'] = df_healthcare_messy['Cholesterol'].fillna(0).round(0).astype(int)  # Remove decimals and convert to int
+Step 4: Standardise date columns
+Dates are often stored in various formats. Standardising them ensures consistency:
+
+# Standardise the Visit Date column 
+ df_healthcare_messy['Visit Date'] = pd.to_datetime(df_healthcare_messy['Visit Date'], errors='coerce')
+Step 5: Handle missing values
+Missing data is a common issue in datasets. We can handle missing values by filling them with appropriate defaults:
+
+# Fill NaN values with a default value or strategy 
+ df_healthcare_messy['Age'].fillna(df_healthcare_messy['Age'].mean(), inplace=True) 
+ df_healthcare_messy['Cholesterol'].fillna(df_healthcare_messy['Cholesterol'].mean(), inplace=True) 
+ 
+ # Fill NaN values for categorical columns with a placeholder or most frequent value 
+ df_healthcare_messy['Gender'].fillna('Unknown', inplace=True) 
+ df_healthcare_messy['Condition'].fillna(df_healthcare_messy['Condition'].mode()[0], inplace=True) 
+ df_healthcare_messy['Medication'].fillna(df_healthcare_messy['Medication'].mode()[0], inplace=True) 
+ df_healthcare_messy['Blood Pressure'].fillna('120/80', inplace=True) 
+ df_healthcare_messy['Email'].fillna('no_email@example.com', inplace=True) 
+ df_healthcare_messy['Phone Number'].fillna('000-000-0000', inplace=True)
+Step 6: Save the cleaned dataset
+Finally, we save the cleaned dataset to a new CSV file for future use:
+
+# Save the cleaned data to a new CSV file 
+ df_healthcare_messy.to_csv('path_to/cleaned_healthcare_messy_data.csv', index=False)
+NB: Please replace the “path_to” with the actual location where you would like the cleaned dataset to be stored on your device.
+
+Summary of cleaning steps
+To summarise, the following steps were taken to clean the dataset:
+
+Loaded the dataset using Pandas.
+Stripped leading and trailing spaces from string columns.
+Corrected non-numeric values in numeric columns.
+Standardised date formats in the Visit Date column.
+Handled missing values by filling them with appropriate defaults or most frequent values.
+Saved the cleaned dataset for future analysis.
+The cleaned dataset can be download using this GitHub link.
