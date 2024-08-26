@@ -1,0 +1,107 @@
+How to clean a messy HR data using Python
+
+Introduction
+Dealing with messy datasets is a common challenge when working with real-world data as a Data Scientist or Data Analyst.
+
+In this exercise, we’ll walk through the process of cleaning a typical messy Human Resources (HR) dataset using Python programming.
+
+Overview of the dataset
+The HR dataset we are working with represents a typical real-world dataset that hasn’t been carefully curated.
+
+You can download the messy HR dataset using this GitHub link.
+
+Here are the specific issues present in the dataset:
+
+1. Inconsistent formatting
+Numerical Columns with Text Entries: Columns like ‘Age’ and ‘Salary’ contain both numeric and text entries. For example, the ‘Age’ column include values such as “30”, “twenty-five”, and “thirty”, which should all be numeric. Similarly, the ‘Salary’ column includes numbers represented as words like “SIXTY THOUSAND” alongside numeric values like “60000”.
+Spaces in Text Fields: Several text-based columns, such as ‘Name’, ‘Department’, and ‘Position’, have extra leading or trailing spaces.
+2. Incorrect data types:
+Dates Stored as Strings: The ‘Joining Date’ column, which should be in a date format, is stored as a string with varying formats. For instance, you will encounter dates like “2021-01-15”, “15/01/2021”, and “January 15, 2021” within the same column, making it difficult to perform time-based analysis or comparisons.
+3. Missing values
+Critical Columns with Missing Data: Several essential columns, such as ‘Email’, and ‘Phone Number’ have missing entries. This can lead to inaccurate analyses if not handled properly.
+4. Placeholder and Invalid Data
+Incorrect Placeholders: Some fields contain invalid placeholders that should not be present. For example, the ‘Salary’ column have placeholders like “NAN” instead of proper null values or numeric entries which can lead to errors during numerical calculations.
+Inconsistent or Incorrect Phone Numbers and Emails: Contact information fields like ‘Phone Number’ and ‘Email’ contain invalid or placeholder data, which need to be identified and cleaned for accurate record-keeping.
+Step 1: Loading the messy dataset
+First, let’s load the dataset using pandas and numpy, which are powerful libraries in Python for data manipulation.
+
+ import pandas as pd 
+ import numpy as np 
+ 
+ # Load the messy data 
+ file_path_large_messy = '/path_to/messy_HR_data.csv' 
+ df_large_messy = pd.read_csv(file_path_large_messy)  
+NB: Please replace the “path_to” with the actual location of the stored messy data on your device.
+
+Step 2: Stripping extra spaces
+Since the HR datasets are not carefully curated, they contain extra spaces around text. These can cause problems during analysis. Let’s remove those unnecessary spaces.
+
+ # Strip leading and trailing spaces from string columns 
+ for column in df_large_messy.select_dtypes(include=['object']).columns: 
+ df_large_messy[column] = df_large_messy[column].str.strip() 
+Step 3: Correcting the “Age” column
+In the ‘Age’ column, you will encounter textual representations of numbers (like ‘thirty’ instead of 30) or incorrect data types. We’ll standardise this column by converting all values to numeric and handling any errors.
+
+ # Correct the Age column 
+ df_large_messy['Age'] = df_large_messy['Age'].replace('thirty', 30) 
+ df_large_messy['Age'] = pd.to_numeric(df_large_messy['Age'], errors='coerce') 
+
+# Fill NaN values in the Age column before converting to int
+df_large_messy['Age'] = df_large_messy['Age'].fillna(0).round(0).astype(int)  # Remove decimals and convert to int 
+Step 4: Cleaning the “Salary” column
+Similarly, the ‘Salary’ column does contain inconsistent data, such as numbers written in words or placeholders for missing data. Let’s clean these up.
+
+# Correct the Salary column 
+ df_large_messy['Salary'] = df_large_messy['Salary'].str.replace('SIXTY THOUSAND', '60000') 
+ df_large_messy['Salary'] = df_large_messy['Salary'].str.replace(' NAN ', 'NaN') 
+ df_large_messy['Salary'] = pd.to_numeric(df_large_messy['Salary'], errors='coerce') 
+Step 5: Standardising date formats
+Dates in datasets have inconsistent format. We’ll standardise the ‘Joining Date’ column to ensure it’s in a consistent date format.
+
+ # Standardise the Joining Date column 
+ df_large_messy['Joining Date'] = pd.to_datetime(df_large_messy['Joining Date'], errors='coerce')
+Step 6: Handling missing values
+Missing values can distort analysis, so we need to handle them carefully. We will fill in missing numerical data with the mean and categorical data with the most frequent value or a placeholder.
+
+# Fill NaN values with a default value or strategy 
+ df_large_messy['Age'].fillna(df_large_messy['Age'].mean(), inplace=True) 
+ df_large_messy['Salary'].fillna(df_large_messy['Salary'].mean(), inplace=True) 
+ 
+ # Fill NaN values for categorical columns 
+ df_large_messy['Gender'].fillna('Unknown', inplace=True) 
+ df_large_messy['Department'].fillna(df_large_messy['Department'].mode()[0], inplace=True) 
+ df_large_messy['Position'].fillna(df_large_messy['Position'].mode()[0], inplace=True) 
+ df_large_messy['Performance Score'].fillna('Unknown', inplace=True) 
+ df_large_messy['Email'].fillna('no_email@example.com', inplace=True) 
+ df_large_messy['Phone Number'].fillna('000-000-0000', inplace=True) 
+Step 7: Saving the cleaned dataset
+Finally, after all the cleaning, we save the cleaned dataset to a new file for further analysis.
+
+ # Save the cleaned data to a new CSV file 
+ df_large_messy.to_csv('/path_to/cleaned_messy_HR_data.csv', index=False) 
+NB: Please replace the “path_to” with the actual location where you would like the cleaned dataset to be stored on your device.
+
+You can download the cleaned HR dataset using this github link.
+
+Summary of data cleaning steps
+Loading the Dataset
+Import necessary libraries (pandas, numpy).
+Load the dataset from a CSV file into a pandas DataFrame.
+Trimming Extra Spaces
+Remove leading and trailing spaces from string columns using the str.strip() method.
+Correcting Data Types
+Convert text representations in the ‘Age’ and ‘Salary’ columns to numeric using pd.to_numeric(), handling non-numeric values gracefully.
+Replace specific string representations (e.g., replacing “thirty” with 30 in the ‘Age’ column).
+Standardising Date Formats
+Convert the ‘Joining Date’ column to a uniform datetime format using pd.to_datetime(), handling errors to avoid data loss.
+Handling Categorical Variables
+Standardise categorical entries (e.g., ‘Department’, ‘Position’) by formatting strings for consistency (like converting all to title case).
+Dealing with Missing Values
+Identify and fill missing numerical values using the mean or median of the column.
+Fill missing categorical values with the mode of the column or a designated placeholder (e.g., ‘Unknown’ for ‘Gender’).
+Final Data Validation
+Perform final checks to ensure that all columns are in the correct format and that there are no remaining null values.
+Use df.info() and df.head() to visually inspect the cleaned dataset.
+Saving the Cleaned Data
+Save the cleaned dataset back to a CSV file for further analysis or operational use, ensuring no index column is included.
+You can download the cleaned HR dataset using this GitHub link.
