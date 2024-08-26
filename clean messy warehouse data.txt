@@ -1,0 +1,102 @@
+How to clean a messy warehouse data using Python: A step-by-step tutorial
+By
+Admin
+Introduction
+Dealing with messy data is a common challenge in data analysis and can significantly impact the results of your analysis.
+
+Cleaning the data is the first and most crucial step toward obtaining reliable insights.
+
+The dataset we will use in this tutorial contains information about a warehouse inventory, but it is plagued with issues such as inconsistent formatting, missing values, incorrect data 
+types, etc.
+
+You will be guided through each step of the cleaning process, using a Python script to transform this messy data into a clean and usable dataset.
+
+Overview of the warehouse dataset
+The dataset we are working with is composed of 1000 rows or records of inventory items and 10 columns.
+
+The dataset can be downloaded using this GitHub link.
+
+Each record has multiple attributes, such as the product name, category, quantity, price, warehouse location, supplier, last restocked date, and status.
+
+However, the dataset needs cleaning up due to several issues, including:
+
+Inconsistent Text Formatting: The Product Name and Category columns contain inconsistent use of uppercase and lowercase letters, making it difficult to group similar items.
+Leading and Trailing Spaces: Several string columns have leading and trailing spaces, which can cause issues when performing operations like filtering or grouping data.
+Incorrect Data Types: The Quantity and Price columns, which should be numeric, contain text entries and are stored as strings. This prevents numerical operations and analyses.
+Invalid Values: Some entries in the Quantity, Price, and Last Restocked columns are marked as ‘NaN’, and the Quantity column even has a value recorded as ‘two hundred’.
+Date Formatting Issues: The Last Restocked column contains dates in an inconsistent format which can lead to potential errors in date-related analyses.
+Step-by-step guide to cleaning the dataset
+1. Loading the Dataset
+The first step is to load the messy dataset into a Pandas DataFrame. This allows us to examine the data and identify the issues that need to be addressed.
+
+import pandas as pd 
+import numpy as np 
+
+# Load the messy data 
+file_path_warehouse_messy = '/path_to/warehouse_messy_data.csv' 
+df_warehouse_messy = pd.read_csv(file_path_warehouse_messy)
+NB: Please replace the “path_to” with the actual location of the stored messy data on your device.
+
+2. Stripping Leading and Trailing Spaces
+Data often contains unnecessary spaces that can lead to mismatches and errors in analysis. We will strip any leading or trailing spaces from all string columns.
+
+# Strip leading and trailing spaces from string columns 
+for column in df_warehouse_messy.select_dtypes(include=['object']).columns: 
+df_warehouse_messy[column] = df_warehouse_messy[column].str.strip()
+3. Standardising Text Formats
+Inconsistent text formatting can make it difficult to group and analyse data. Here, we standardise the ‘Product Name’ and ‘Category’ columns by converting them to proper case and capitalising the first letter, respectively.
+
+# Convert Product Name to proper case 
+df_warehouse_messy['Product Name'] = df_warehouse_messy['Product Name'].str.title() 
+
+# Correct the Category column 
+df_warehouse_messy['Category'] = df_warehouse_messy['Category'].str.capitalize()
+4. Correcting and Converting Data Types
+Data types must be correct for proper analysis. We need to replace incorrect entries, convert text-based numbers to numeric types, and ensure that dates are in the correct format.
+
+# Correct the Quantity column 
+df_warehouse_messy['Quantity'] = df_warehouse_messy['Quantity'].replace('two hundred', 200) # Replace 'two hundred' with 200 
+df_warehouse_messy['Quantity'] = df_warehouse_messy['Quantity'].replace('NaN', np.nan) # Replace 'NaN' with np.nan 
+df_warehouse_messy['Quantity'] = pd.to_numeric(df_warehouse_messy['Quantity'], errors='coerce') # Convert to numeric 
+
+# Correct the Price column 
+df_warehouse_messy['Price'] = df_warehouse_messy['Price'].replace('NaN', np.nan) # Replace 'NaN' with np.nan 
+df_warehouse_messy['Price'] = pd.to_numeric(df_warehouse_messy['Price'], errors='coerce') # Convert to numeric 
+
+# Correct the Last Restocked column 
+df_warehouse_messy['Last Restocked'] = df_warehouse_messy['Last Restocked'].replace('NaN', np.nan) # Replace 'NaN' with np.nan 
+df_warehouse_messy['Last Restocked'] = pd.to_datetime(df_warehouse_messy['Last Restocked'], errors='coerce') # Convert to datetime
+5. Handling Missing Values
+Missing values can distort your analysis, so it’s crucial to handle them appropriately. We will fill numeric columns with the mean, and categorical columns with the most frequent value or a placeholder.
+
+# Fill NaN values with a default value or strategy, here we use mean for numeric columns 
+df_warehouse_messy['Quantity'].fillna(df_warehouse_messy['Quantity'].mean(), inplace=True) 
+df_warehouse_messy['Price'].fillna(df_warehouse_messy['Price'].mean(), inplace=True) 
+
+# Fill NaN values for categorical columns with a placeholder or most frequent value 
+df_warehouse_messy['Product Name'].fillna('Unknown Product', inplace=True) 
+df_warehouse_messy['Category'].fillna('Unknown Category', inplace=True) 
+df_warehouse_messy['Warehouse'].fillna(df_warehouse_messy['Warehouse'].mode()[0], inplace=True) 
+df_warehouse_messy['Location'].fillna('Unknown Location', inplace=True) 
+df_warehouse_messy['Supplier'].fillna(df_warehouse_messy['Supplier'].mode()[0], inplace=True) 
+df_warehouse_messy['Status'].fillna(df_warehouse_messy['Status'].mode()[0], inplace=True) 
+df_warehouse_messy['Last Restocked'].fillna(pd.to_datetime('today'), inplace=True)
+6. Saving the Cleaned Dataset
+Finally, once the data has been cleaned, we save the cleaned dataset to a new CSV file.
+
+# Save the cleaned data to a new CSV file 
+df_warehouse_messy.to_csv('/path_to/cleaned_warehouse_messy_data.csv', index=False)
+NB: Please replace the “path_to” with the actual location where you would like the cleaned dataset to be stored on your device.
+
+The cleaned dataset can be download using this GitHub link.
+
+Below is just a snippet of the cleaned dataset:
+
+
+Summary of steps taken
+Loaded the messy dataset into a Pandas DataFrame.
+Stripped leading and trailing spaces from string columns.
+Standardised text formats in the ‘Product Name’ and ‘Category’ columns.
+Corrected and converted data types for the ‘Quantity’, ‘Price’, and ‘Last Restocked’ columns.
+Handled missing values by filling them with appropriate defaults.
+Saved the cleaned data into a new CSV file.
