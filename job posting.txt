@@ -1,0 +1,125 @@
+How to clean a job postings dataset using Python
+
+Introduction
+
+When working with real-world data, it’s common to encounter datasets that are messy, inconsistent, and full of missing values.
+
+Before diving into any analysis, it’s crucial to clean your data to ensure accuracy and reliability.
+
+In this tutorial, we’ll be working with a dataset that contains job postings for data science positions. The data was scrapped from glassdoor’s website.
+
+The dataset can be downloaded using this GitHub link.
+
+This dataset has several issues as briefly described below.
+
+Understanding the job postings data
+The dataset contains 672 entries and 15 columns. The columns are as follows:
+
+index: A numerical index (likely not necessary and can be dropped).
+Job Title: The title of the job position.
+Salary Estimate: The salary range, which also includes some text (“Glassdoor est.”).
+Job Description: A textual description of the job.
+Rating: A numerical rating of the company.
+Company Name: The name of the company, but it also includes the rating in some cases.
+Location: The location of the job.
+Headquarters: The location of the company’s headquarters.
+Size: The size of the company (number of employees).
+Founded: The year the company was founded.
+Type of ownership: The type of ownership (e.g., Private, Public).
+Industry: The industry to which the company belongs.
+Sector: The sector of the economy.
+Revenue: The revenue of the company, often including text (e.g., “(USD)”).
+Competitors: The names of competitors, but some entries have “-1”, likely indicating missing data.
+Suggested cleaning strategy
+Drop Unnecessary Columns: The index column may not be needed.
+Separate Company Name and Rating: The Company Name column often includes the company’s rating, which needs to be separated.
+Clean Salary Estimate: Remove extra text like “(Glassdoor est.)” and convert the salary to a numerical range.
+Handle Missing Values: Check for and appropriately handle missing values, particularly in the Competitors column.
+Standardise Formats: Ensure consistent formatting in columns like Size, Revenue, and Location.
+Extract Additional Features: Consider extracting features like minimum and maximum salary from the Salary Estimate column.
+Step-by-Step data cleaning process
+Step 1: Import the Necessary Libraries
+First, import the Pandas library, which is essential for data manipulation in Python. Next, load the dataset into a Pandas DataFrame.
+
+import pandas as pd 
+
+  # Load the dataset
+
+  file_path = '/path_to/Uncleaned_DS_jobs.csv'
+
+df = pd.read_csv(file_path)
+NB: Please replace the “path_to” with the actual location of the stored messy data on your device.
+
+Step 2: Drop Unnecessary Columns
+In this step, we’ll remove columns that are not needed for our analysis, such as the index and Job Description columns.
+
+# Drop the unnecessary 'index' and 'Job Description' columns 
+
+df_cleaned = df.drop(columns=['index', 'Job Description'])
+Step 3: Separate Company Name and Rating
+The Company Name column contains both the company name and its rating, separated by a newline character. We’ll separate these into distinct columns.
+
+# Separate the 'Company Name' and 'Rating' 
+
+  df_cleaned['Rating'] = df_cleaned['Company Name'].apply(lambda x: float(x.split('\n')[-1]) if '\n' in x else None)
+
+df_cleaned['Company Name'] = df_cleaned['Company Name'].apply(lambda x: x.split('\n')[0])
+Step 4: Clean the Salary Estimate Column
+The Salary Estimate column contains salary ranges mixed with extra text, such as “Glassdoor est.” We need to clean this column and convert the salary values into a numerical format.
+
+# Clean the 'Salary Estimate' column 
+
+  df_cleaned['Salary Estimate'] = df_cleaned['Salary Estimate'].str.replace(r'\(.*\)', '', regex=True)
+
+  df_cleaned['Salary Estimate'] = df_cleaned['Salary Estimate'].str.replace('$', '').str.replace('K', '').str.replace(',', '').str.strip()
+
+  # Split the salary estimate into minimum and maximum salary
+
+  df_cleaned[['Min Salary', 'Max Salary']] = df_cleaned['Salary Estimate'].str.split('-', expand=True)
+
+  df_cleaned['Min Salary'] = df_cleaned['Min Salary'].astype(float) * 1000
+
+  df_cleaned['Max Salary'] = df_cleaned['Max Salary'].astype(float) * 1000
+
+  # Drop the original 'Salary Estimate' column as it's no longer needed
+
+df_cleaned = df_cleaned.drop(columns=['Salary Estimate'])
+Step 5: Handle Missing Values
+Some columns contain placeholder values such as -1 to indicate missing data. We’ll replace these with None, which is the Python representation of missing values.
+
+# Handle missing values in the 'Competitors' column 
+
+df_cleaned['Competitors'] = df_cleaned['Competitors'].replace('-1', None)
+Step 6: Standardise Formats
+Finally, we ensure consistent formatting across the dataset, particularly in columns like Founded and Revenue.
+
+# Convert 'Founded' to a standardised numerical format 
+
+  df_cleaned['Founded'] = pd.to_datetime(df_cleaned['Founded'], format='%Y', errors='coerce').dt.year
+
+  # Standardise the 'Revenue' column
+
+df_cleaned['Revenue'] = df_cleaned['Revenue'].replace('Unknown / Non-Applicable', None)
+Step 7: Saving the cleaned data
+The dataset is now cleaned and ready for analysis.
+
+# Save the cleaned DataFrame to a new CSV file
+cleaned_file_path = '/path_to/Cleaned_DS_jobs.csv'
+df_cleaned.to_csv(cleaned_file_path, index=False)
+
+print(f"Cleaned dataset saved to {cleaned_file_path}")
+NB: Please replace the “path_to” with the actual location where you would like the cleaned dataset to be stored on your device.
+
+The cleaned dataset can be download using this GitHub link.
+
+Below is just a snippet of the cleaned dataset:
+
+ummary of the data cleaning process
+Loading the Dataset: We began by loading the dataset into a Pandas DataFrame, which allowed us to inspect and manipulate the data easily.
+Dropping Unnecessary Columns: We removed columns that were not required for the analysis, specifically the index and Job Description columns, to streamline the dataset.
+Separating Embedded Data: The Company Name column contained both the company name and its rating, separated by a newline character. We extracted the rating into a new Rating column and kept only the company name in the Company Name column.
+Cleaning the Salary Data: The Salary Estimate column had salary ranges mixed with extra text, like “Glassdoor est.” We cleaned this column by removing the text and splitting the salary range into two separate columns: Min Salary and Max Salary.
+Handling Missing Values: The Competitors column had placeholder values like -1 to indicate missing data. We replaced these with None, which is the standard way to represent missing data in Python.
+Standardising Data Formats: We ensured that the Founded and Revenue columns were in a consistent format, converting the Founded year to a numerical format and standardising the Revenue column by removing any entries marked as “Unknown / Non-Applicable”.
+Saving the Cleaned Dataset: Finally, the cleaned dataset was saved to a new CSV file, making it ready for further analysis.
+Conclusion
