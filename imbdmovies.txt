@@ -1,0 +1,131 @@
+How to clean a messy IMDB movies data using Python
+
+Introduction
+In the world of data science and analytics, the quality of your analysis is only as good as the quality of your data.
+
+Unfortunately, real-world datasets are often messy, requiring extensive cleaning before you can extract meaningful insights.
+
+In this tutorial, we’ll walk through a step-by-step process to clean a typical messy IMDB dataset using Python programming.
+
+Overview of the IMDB movies data
+This dataset includes 100 movies from the IMDb database and features 11 variables: IMDb movie ID, original title, release year, genre, duration, country, content rating, director’s name, worldwide income, number of votes, and IMDb score.
+
+It is a disorganised dataset with numerous issues that need to be addressed, such as missing values, empty rows and columns, poorly named variables, inconsistent or incorrect date formats, numeric columns containing symbols, units, characters, thousand separators, multiple and incorrect decimal separators, typographical errors, and a multi-category variable improperly coded as a single character variable.
+
+You can download the messy HR dataset using this GitHub link and kaggle.
+
+Key observations
+Column Names: Some column names contain unexpected characters, likely due to encoding issues (e.g., “Original titlÊ” and “Genrë¨”).
+Missing Values: There are missing values in columns like “Duration” and “Content Rating.” Additionally, there is an “Unnamed: 8” column that is entirely empty.
+Data Types: Some columns (e.g., “Release year,” “Income,” “Votes,” and “Score”) are currently treated as object types, though they should be numeric or categorical.
+Inconsistent Formatting: Dates in the “Release year” column and numeric fields like “Votes” and “Income” appear to have inconsistent formatting.
+Suggested steps for cleaning
+Rename Columns: Correct any issues with column names.
+Drop Unnecessary Columns: Remove the “Unnamed: 8” column, as it contains no useful information.
+Handle Missing Values: Address missing values through imputation or removal, depending on the column’s relevance.
+Convert Data Types: Convert columns like “Release year,” “Income,” “Votes,” and “Score” to appropriate data types.
+Standardised Formatting: Clean and standardize date formats and numeric fields.
+Remove or Correct Invalid Data: Identify and fix any invalid entries.
+The “Votes” column appears to have extra spaces in its name and needs fixing.
+Step-by-step data cleaning using Python
+1. Loading the Dataset
+Let’s start by importing pandas.
+
+import pandas as pd 
+Loading the dataset correctly is the first critical step. The dataset had encoding issues, so let’s use the ISO-8859-1 encoding to avoid errors and load the data accurately.
+
+# Load the dataset with the correct encoding 
+df = pd.read_csv('/path_to/messy_IMDB_dataset.csv', encoding='ISO-8859-1', sep=None, engine='python') 
+NB: Please replace the “path_to” with the actual location of the stored messy data on your device.
+
+2. Inspecting and diagnosing issues
+An initial inspection helps identify the key issues in the dataset. Using pandas functions like head(), info(), and describe(), you can discover several problems: malformed column names, missing values, and incorrect data types.
+
+# Inspect the dataset 
+
+  df.head()
+
+  df.info()
+
+df.describe(include='all')
+3. Renaming columns
+Descriptive and correctly spelled column names are essential for readability and maintenance. You can fix the corrupted column names caused by encoding issues.
+
+# Rename columns 
+
+  df.rename(columns={
+
+      'IMBD title ID': 'IMDB_title_ID',
+
+      'Original titlÊ': 'Original_title',
+
+      'Release year': 'Release_year',
+
+      'Genrë¨': 'Genre',
+
+      'Duration': 'Duration',
+
+      'Country': 'Country',
+
+      'Content Rating': 'Content_Rating',
+
+      'Director': 'Director',
+
+      'Income': 'Income',
+
+      'Votes': 'Votes',
+
+      'Score': 'Score'
+
+}, inplace=True)
+4. Handling missing values
+Missing data can lead to inaccurate analysis. Different strategies can be used to handle missing values, such as filling with placeholders and dropping rows with critical missing data.
+
+# Handle missing values 
+
+  df['Duration'].fillna('Unknown', inplace=True)
+
+  df['Content_Rating'].fillna('Not Rated', inplace=True)
+
+  # Drop rows with critical missing data
+
+df.dropna(subset=['IMDB_title_ID', 'Original_title', 'Release_year'], inplace=True)
+5. Converting data types
+Correct data types are necessary for accurate computations. You may convert several columns, such as dates, income, and votes, from text to their appropriate types.
+
+# Convert data types 
+
+  df['Release_year'] = pd.to_datetime(df['Release_year'], errors='coerce')
+
+  df['Income'] = pd.to_numeric(df['Income'].replace('[\$,]', '', regex=True), errors='coerce')
+
+df['Votes'] = pd.to_numeric(df['Votes'].replace('[\.,]', '', regex=True), errors='coerce')
+6. Standardising data
+Consistency is key in data analysis. You may standardise the formatting of the ‘Score’ column, ensuring all values are numeric and correctly scaled.
+
+# Clean and standardize the 'Score' column 
+
+  df['Score'] = pd.to_numeric(df['Score'].replace('[^0-9.]', '', regex=True), errors='coerce')
+
+  # Normalise any scores greater than 10
+
+df['Score'] = df['Score'].apply(lambda x: x/10 if x > 10 else x)
+7. Final quality check
+Finally, you may want to re-inspect the dataset to ensure all issues were resolved, and the data was clean and ready for analysis.
+
+# Final inspection 
+
+  df.info()
+
+df.head()
+Summary of steps taken
+Loading the Dataset: Used the correct encoding to load the dataset without errors.
+Inspecting the Data: Conducted an initial inspection to identify key issues.
+Renaming Columns: Corrected malformed column names for better readability.
+Handling Missing Values: Filled missing values with placeholders and dropped rows with essential missing data.
+Converting Data Types: Converted text fields to appropriate data types like datetime and numeric.
+Standardising Data: Cleaned and standardised numeric fields to ensure consistency.
+Final Quality Check: Conducted a final review to confirm that the dataset was clean.
+You can download the cleaned HR dataset using this GitHub link.
+
+
